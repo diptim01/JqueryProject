@@ -1,0 +1,163 @@
+<html>
+
+<head>
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+    <script type="application/javascript" src="jquery-3.3.1.js"></script>
+    <script type="application/javascript" src="js/bootstrap.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $("#tablematerial").hide();
+            $(SaveAddress).click(function () {
+                var addressBooks = [];
+                var addressBook = {};
+                var name = document.getElementsByName("name")[0].value;
+                var number = document.getElementsByName("number")[0].value;
+                if (name == "" || number == "") {
+                    alert(">>>>Please kindly fill the text box<<<<<<<");
+                    return;
+                }
+                addressBook = {
+                    "name": name
+                    , "number": number
+                }
+                var retrievedObject = JSON.parse(localStorage.getItem('addressBook'));
+                if (retrievedObject != null) {
+                    retrievedObject.push(addressBook);
+                    localStorage.setItem('addressBook', JSON.stringify(retrievedObject));
+                }
+                else {
+                    addressBooks.push(addressBook);
+                    localStorage.setItem('addressBook', JSON.stringify(addressBooks));
+                }
+                location.reload();
+                alert("Address Added!");
+            });
+            //            Get list of addresses
+            $("#GetAddress").click(function () {
+                $(".clear").empty();
+                var nameLists = [];
+                var numberLists = [];
+                var retrievedObject = JSON.parse(localStorage.getItem('addressBook'));
+                for (var i = 0; i < retrievedObject.length; i++) {
+                    nameLists.push(retrievedObject[i].name);
+                    numberLists.push(retrievedObject[i].number);
+                }
+                $("#tablematerial").show();
+                for (var i = 0; i < nameLists.length; i++) {
+                    $("#myTable > tbody").append('<tr class="clear"><td><a href="#" class="nameclick" data-toggle="modal" data-target="#addressDetail" data-name="' + nameLists[i] + '" data-number="' + numberLists[i] + '" >' + nameLists[i] + '</a></td><td><a href="#" data-toggle="modal" data-target="#addressedit" class="editAddress btn btn-primary" data-name="' + nameLists[i] + '" data-number="' + numberLists[i] + '" > Edit </a> || <a href="#" class="deleteAddressbook btn btn-danger" data-name="' + nameLists[i] + '"> Delete </a> </td></tr>');
+                };
+            });
+            $(EditAddress).click(function () {
+                var name = $("#previousname").val();
+                var number = $("#previousnumber").val();
+                var retrievedObject = JSON.parse(localStorage.getItem('addressBook'));
+                for (var i = 0; i < retrievedObject.length; i++) {
+                    if (retrievedObject[i].name == name) {
+                        retrievedObject[i].number = number;
+                        localStorage.setItem('addressBook', JSON.stringify(retrievedObject));
+                        location.reload();
+                        alert("address successfully edited");
+                        break;
+                    }
+                }
+            });
+            $("#myTable > tbody").delegate('.nameclick', 'click', function () {
+                var number = $(this).data("number");
+                $("#number").text(number);
+                var name = $(this).data("name");
+                $("#name").text(name);
+            });
+            $("#myTable > tbody").delegate('.editAddress', 'click', function () {
+                var number = $(this).data("number");
+                $("#previousnumber").val(number);
+                var name = $(this).data("name");
+                $("#previousname").val(name);
+            });
+            $("#myTable > tbody").delegate('.deleteAddressbook', 'click', function () {
+                if (confirm("Are you sure you want to delete this?")) {
+                    var retrievedObject = JSON.parse(localStorage.getItem('addressBook'));
+                    var name = $(this).data("name");
+                    for (var i = 0; i < retrievedObject.length; i++) {
+                        if (retrievedObject[i].name == name) {
+                            retrievedObject.splice(i, 1);
+                            localStorage.setItem('addressBook', JSON.stringify(retrievedObject));
+                            location.reload();
+                            alert("address successfully deleted");
+                            break;
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+    <title>Address Book Homepage </title>
+</head>
+
+<body>
+    <section>
+        <br>
+        <form name="addressForm" action="/"> First Name:
+            <input type="text" name="name" required placeholder="enter your name here">
+            <br> Phone Number:
+            <input type="number" name="number" required placeholder="enter your phone number here">
+            <br>
+            <p></p>
+            <input type="button" class="btn btn-primary" value="Save Address" id="SaveAddress">
+            <input type="button" class="btn btn-success" value="Click to view saved address" id="GetAddress"> </form>
+    </section>
+    <section>
+        <div id="tablematerial">
+            <table class="table" id="myTable">
+                <thead>
+                    <tr>
+                        <th> Names </th>
+                        <th> Options </th>
+                    </tr>
+                </thead>
+                <tbody> </tbody>
+            </table>
+        </div>
+    </section>
+    <!-- Modal -->
+    <div id="addressDetail" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">My Address</h4> </div>
+                <div class="modal-body"> Name:
+                    <p id="name"></p>
+                    <br> Phone Number:
+                    <p id="number"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- end modal -->
+    <!-- Modal -->
+    <div id="addressedit" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Edit my Address</h4> </div>
+                <div class="modal-body"> Name:
+                    <input id="previousname" disabled />
+                    <br> Phone Number:
+                    <input type="number" id="previousnumber" /> </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-success" data-dismiss="modal" id="EditAddress">Submit!</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- end modal -->
+</body>
+
+</html>
